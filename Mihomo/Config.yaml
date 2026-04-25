@@ -1,16 +1,51 @@
-# ----------------- 基础设置 -----------------
+# ----------------- 基礎設置 (Mihomo 特有優化) -----------------
 mixed-port: 7890
 allow-lan: false
 mode: rule
 log-level: info
 ipv6: false
 
-# ----------------- TUN 模式设置 -----------------
+# 新增：性能與隱私優化
+unified-delay: true           # 統一延遲計算，去除握手開銷，數值更真實
+tcp-fast-open: true           # 開啟 TCP 快開，減少連接建立時間
+global-client-fingerprint: chrome # 模擬 Chrome TLS 指紋，增加隱私性並防範部分封鎖
+find-process-mode: always     # 始終開啟進程檢測，確保進程名規則精確生效
+
+# 新增：控制面板設置 (Clash Party 通常會接管，但寫入配置更穩定)
+external-controller: 127.0.0.1:9090
+secret: ""
+
+# 新增：緩存與持久化
+profile:
+  store-selected: true        # 記住上次選中的節點
+  store-fake-ip: true         # 記憶 Fake-IP 映射，加速二連
+
+# 新增：Geo 數據更新設置
+geodata-mode: true            # 使用 GeoData 模式
+geodata-loader: memconservative # 內存節省模式
+
+# ----------------- 流量嗅探 (Sniffer) -----------------
+# 重要：修正 TUN 模式下因 Fake-IP 導致的域名識別問題
+sniffer:
+  enable: true
+  parse-pure-ip: true         # 嘗試解析純 IP 流量
+  sniff:
+    TLS:
+      ports: [443, 8443]
+    HTTP:
+      ports: [80, 8080-8888]
+      transparent: true
+    QUIC:
+      ports: [443, 8443]
+
+# ----------------- TUN 模式設置 -----------------
 tun:
   enable: true
   stack: system
   auto-route: true
   auto-detect-interface: true
+  dns-hijack:
+    - "any:53"                # 劫持所有 53 端口流量到 Clash DNS
 
 # ----------------- 加密 DNS (DoH) 設置 -----------------
 dns:
@@ -19,23 +54,23 @@ dns:
   ipv6: false
   enhanced-mode: fake-ip
   fake-ip-range: 198.18.0.1/16
-
+  
   default-nameserver:
     - 223.5.5.5
     - 119.29.29.29
-
+    
   nameserver:
     - https://dns.alidns.com/dns-query
     - https://doh.pub/dns-query
-
+    
   fallback:
     - https://dns.cloudflare.com/dns-query
-    - https://dns.google/dns-query  
-
+    - https://dns.google/dns-query
+    
   fallback-filter:
     geoip: true
     geoip-code: CN
-
+    
   fake-ip-filter:
     - '*.srv.nintendo.net'
     - '*.stun.playstation.net'
@@ -53,11 +88,11 @@ dns:
   nameserver-policy:
     '*.pub.3gppnetwork.org': 'https://dns.google/dns-query'
 
-# ----------------- 节点订阅 (Proxy Providers) -----------------
+# ----------------- 節點訂閱 (Proxy Providers) -----------------
 proxy-providers:
   "✈️ 我的节点":
     type: http
-    url: "https://???????" # 请替换为你的实际节点订阅链接
+    url: "https://???????" # 替換為你的真實連結
     interval: 86400
     path: ./providers/my_nodes.yaml
     health-check:
@@ -65,7 +100,7 @@ proxy-providers:
       interval: 300
       url: http://connectivitycheck.gstatic.com/generate_204
 
-# ----------------- 独立代理节点 (Proxies) -----------------
+# ----------------- 代理鏈節點 (Proxies) -----------------
 proxies:
   - name: "🇭🇰 香港落地"
     type: ss
@@ -85,18 +120,11 @@ proxies:
     udp: true
     dialer-proxy: "🇺🇲 美国节点"
 
-# ----------------- 策略组 (Proxy Groups) -----------------
+# ----------------- 策略組 (Proxy Groups) -----------------
 proxy-groups:
-  # 手动选择组
   - name: "🚀 节点选择"
     type: select
-    proxies:
-      - "🇭🇰 香港节点"
-      - "🇺🇲 美国节点"
-      - "🇯🇵 日本节点"
-      - "🇨🇳 台湾节点"
-      - "🇸🇬 新加坡节点"
-      - "🀄️ 大陆直连"
+    proxies: ["🇭🇰 香港节点", "🇺🇲 美国节点", "🇯🇵 日本节点", "🇨🇳 台湾节点", "🇸🇬 新加坡节点", "🀄️ 大陆直连"]
 
   - name: "🍎 苹果服务"
     type: select
@@ -126,14 +154,12 @@ proxy-groups:
     type: select
     proxies: [REJECT]
 
-  # 自动筛选与测速组
   - name: "🇭🇰 香港节点"
     type: url-test
     use: ["✈️ 我的节点"]
     filter: "香港"
     url: http://connectivitycheck.gstatic.com/generate_204
     interval: 300
-    tolerance: 50
 
   - name: "🇺🇲 美国节点"
     type: url-test
@@ -141,7 +167,6 @@ proxy-groups:
     filter: "美国"
     url: http://connectivitycheck.gstatic.com/generate_204
     interval: 300
-    tolerance: 50
 
   - name: "🇯🇵 日本节点"
     type: url-test
@@ -149,7 +174,6 @@ proxy-groups:
     filter: "日本"
     url: http://connectivitycheck.gstatic.com/generate_204
     interval: 300
-    tolerance: 50
 
   - name: "🇨🇳 台湾节点"
     type: url-test
@@ -157,7 +181,6 @@ proxy-groups:
     filter: "台湾"
     url: http://connectivitycheck.gstatic.com/generate_204
     interval: 300
-    tolerance: 50
 
   - name: "🇸🇬 新加坡节点"
     type: url-test
@@ -165,7 +188,6 @@ proxy-groups:
     filter: "新加坡"
     url: http://connectivitycheck.gstatic.com/generate_204
     interval: 300
-    tolerance: 50
 
 # ----------------- 规则集定义 (Rule Providers) -----------------
 rule-providers:
