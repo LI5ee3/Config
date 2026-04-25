@@ -1,8 +1,3 @@
-# ==========================================
-# 基于 Surge Config.conf 转换的 Clash Party 配置
-# 内核要求: Mihomo (Clash.Meta)
-# ==========================================
-
 # ----------------- 基础设置 -----------------
 mixed-port: 7890
 allow-lan: false
@@ -16,15 +11,31 @@ tun:
   stack: system
   auto-route: true
   auto-detect-interface: true
-  # Surge 中的 skip-proxy IP 段可通过规则或 TUN 的排除路由实现，这里默认由规则接管本地流量
 
-# ----------------- DNS 设置 -----------------
+# ----------------- 加密 DNS (DoH) 設置 -----------------
 dns:
   enable: true
   listen: 0.0.0.0:1053
   ipv6: false
   enhanced-mode: fake-ip
   fake-ip-range: 198.18.0.1/16
+
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+
+  nameserver:
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+
+  fallback:
+    - https://dns.cloudflare.com/dns-query
+    - https://dns.google/dns-query  
+
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+
   fake-ip-filter:
     - '*.srv.nintendo.net'
     - '*.stun.playstation.net'
@@ -38,12 +49,9 @@ dns:
     - '*.pub.3gppnetwork.org'
     - '*.t-mobile.com'
     - '*.apple.com'
-  nameserver:
-    - 223.5.5.5
-    - 119.29.29.29
+    
   nameserver-policy:
-    # 对应 Surge [Host] 段的特定域名 DNS 解析
-    '*.pub.3gppnetwork.org': 'https://8.8.8.8/dns-query'
+    '*.pub.3gppnetwork.org': 'https://dns.google/dns-query'
 
 # ----------------- 节点订阅 (Proxy Providers) -----------------
 proxy-providers:
@@ -66,7 +74,6 @@ proxies:
     cipher: 2022-blake3-aes-128-gcm
     password: "77777"
     udp: true
-    # 对应 Surge 的 underlying-proxy 代理链功能
     dialer-proxy: "🇭🇰 香港节点"
 
   - name: "🇺🇸 美国落地"
@@ -80,7 +87,7 @@ proxies:
 
 # ----------------- 策略组 (Proxy Groups) -----------------
 proxy-groups:
-  # 1. 手动选择组
+  # 手动选择组
   - name: "🚀 节点选择"
     type: select
     proxies:
@@ -119,7 +126,7 @@ proxy-groups:
     type: select
     proxies: [REJECT]
 
-  # 2. 自动筛选与测速组 (对应 Surge 的 Smart 分组)
+  # 自动筛选与测速组
   - name: "🇭🇰 香港节点"
     type: url-test
     use: ["✈️ 我的节点"]
@@ -161,7 +168,6 @@ proxy-groups:
     tolerance: 50
 
 # ----------------- 规则集定义 (Rule Providers) -----------------
-# 启用 format: text 直接解析 Surge 格式的 .list 文件
 rule-providers:
   Lan: { type: http, behavior: classical, format: text, url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Lan/Lan.list", path: ./rules/Lan.list, interval: 86400 }
   Adobe: { type: http, behavior: classical, format: text, url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Adobe/Adobe.list", path: ./rules/Adobe.list, interval: 86400 }
@@ -198,7 +204,6 @@ rule-providers:
 # ----------------- 分流规则 (Rules) -----------------
 rules:
   - RULE-SET,Lan,🀄️ 大陆直连
-  # 调整为 Clash 兼容的进程名匹配
   - PROCESS-NAME,Adobe Photoshop 2025,♻️ 网络净化
   - RULE-SET,Adobe,♻️ 网络净化
   - RULE-SET,DIRECT_Custom,🀄️ 大陆直连
@@ -231,5 +236,4 @@ rules:
   - RULE-SET,Proxy_All,🚀 节点选择
   - RULE-SET,ChinaMax,🀄️ 大陆直连
   - GEOIP,CN,🀄️ 大陆直连,no-resolve
-  # 兜底规则 (对应 Surge 中的 FINAL)
   - MATCH,🚀 节点选择
