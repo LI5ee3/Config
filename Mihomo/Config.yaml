@@ -31,7 +31,6 @@ geox-url:
   mmdb: "https://github.com/Hackl0us/GeoIP2-CN/raw/release/Country.mmdb"
 
 # ===== TUN 模式 =====
-# 如果客户端已经设置系统代理，可保持关闭；需要透明代理时再开启。
 tun:
   enable: false
   stack: mixed
@@ -115,10 +114,21 @@ dns:
 
 # ===== 节点订阅 =====
 proxy-providers:
-  my_nodes:
+  - nodes:
     type: http
     url: "https://example.com/your-subscription-url"
-    path: ./proxy_providers/my_nodes.yaml
+    path: ./proxy_providers/nodes.yaml
+    interval: 86400
+    health-check:
+      enable: true
+      url: http://connectivitycheck.gstatic.com/generate_204
+      interval: 600
+      timeout: 2000
+      expected-status: 204
+  - Paoluz:
+    type: http
+    url: "https://example.com/your-subscription-url"
+    path: ./proxy_providers/Paoluz.yaml
     interval: 86400
     health-check:
       enable: true
@@ -128,7 +138,7 @@ proxy-providers:
       expected-status: 204
 
 # 手动节点留空；如需手写节点，把 [] 改为列表。
-proxies: []
+# proxies: []
 
 # ===== 策略组 =====
 proxy-groups:
@@ -184,7 +194,7 @@ proxy-groups:
   - name: "🇭🇰 香港节点"
     type: url-test
     use:
-      - my_nodes
+      - nodes
     filter: "(?i)香港|港|HK|Hong Kong|HongKong"
     url: http://connectivitycheck.gstatic.com/generate_204
     interval: 600
@@ -196,7 +206,7 @@ proxy-groups:
   - name: "🇺🇲 美国节点"
     type: url-test
     use:
-      - my_nodes
+      - nodes
     filter: "(?i)美国|美國|US|USA|United States|America"
     url: http://connectivitycheck.gstatic.com/generate_204
     interval: 600
@@ -208,7 +218,7 @@ proxy-groups:
   - name: "🇯🇵 日本节点"
     type: url-test
     use:
-      - my_nodes
+      - nodes
     filter: "(?i)日本|JP|Japan"
     url: http://connectivitycheck.gstatic.com/generate_204
     interval: 600
@@ -220,7 +230,7 @@ proxy-groups:
   - name: "🇨🇳 台湾节点"
     type: url-test
     use:
-      - my_nodes
+      - nodes
     filter: "(?i)台湾|台灣|TW|Taiwan"
     url: http://connectivitycheck.gstatic.com/generate_204
     interval: 600
@@ -232,7 +242,7 @@ proxy-groups:
   - name: "🇸🇬 新加坡节点"
     type: url-test
     use:
-      - my_nodes
+      - nodes
     filter: "(?i)新加坡|狮城|獅城|SG|Singapore"
     url: http://connectivitycheck.gstatic.com/generate_204
     interval: 600
@@ -254,8 +264,13 @@ proxy-groups:
   - name: "✈️ 我的节点"
     type: select
     use:
-      - my_nodes
-
+      - nodes
+      
+  - name: "🎬 流媒体"
+    type: select
+    use:
+      - Paoluz
+      
   - name: GLOBAL
     type: select
     proxies:
@@ -268,8 +283,6 @@ proxy-groups:
       - "🀄️ 大陆直连"
 
 # ===== 外部规则集 =====
-# Surge 的 RULE-SET URL 在 Mihomo 中需要先声明为 rule-providers。
-# 这些 .list 文件按 classical/text 加载，规则顺序与原 Surge 配置保持一致。
 rule-providers:
   lan:
     type: http
@@ -590,14 +603,8 @@ rule-providers:
 rules:
   # 局域网地址
   - RULE-SET,lan,🀄️ 大陆直连
-  - DOMAIN-SUFFIX,local,🀄️ 大陆直连
-  - IP-CIDR,192.168.5.0/24,🀄️ 大陆直连,no-resolve
-  - IP-CIDR,10.0.0.0/8,🀄️ 大陆直连,no-resolve
-  - IP-CIDR,172.16.0.0/12,🀄️ 大陆直连,no-resolve
-  - IP-CIDR,127.0.0.0/8,🀄️ 大陆直连,no-resolve
 
-  # Adobe / 网络净化
-  - PROCESS-PATH,/Applications/Adobe Photoshop 2025/Adobe Photoshop 2025.app/,♻️ 网络净化
+  # Adobe
   - RULE-SET,adobe,♻️ 网络净化
 
   # 个人规则集
@@ -628,9 +635,9 @@ rules:
   - RULE-SET,google,🇺🇲 美国节点
 
   # 流媒体
-  - RULE-SET,youtube,🇭🇰 香港节点
-  - RULE-SET,netflix,🇭🇰 香港节点
-  - RULE-SET,disney,🇭🇰 香港节点
+  - RULE-SET,youtube,🎬 流媒体
+  - RULE-SET,netflix,🎬 流媒体
+  - RULE-SET,disney,🎬 流媒体
   - RULE-SET,global_media,🇭🇰 香港节点
 
   # 电商平台
@@ -664,9 +671,3 @@ rules:
 
   # DNS 查询失败无法在 Mihomo 中 1:1 表达，这里使用 MATCH 作为兜底。
   - MATCH,🚀 节点选择
-
-# ===== Surge URL Rewrite 迁移提示 =====
-# Surge 里的 Xbox URL Rewrite 属于 HTTP 改写能力，Mihomo 内核配置无法 1:1 实现。
-# 如果你的客户端支持重写/脚本，请在客户端侧迁移以下两条逻辑：
-# ^http://(assets1|assets2|d1|d2|xvcf1|xvcf2)\.xboxlive\.com -> http://assets1.xboxlive.cn
-# ^http://(dlassets|dlassets2)\.xboxlive\.com -> http://dlassets.xboxlive.cn
