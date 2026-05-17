@@ -10,3 +10,5 @@ proxies+:
 proxy-providers:
   - nodes:
     url: "https://example.com/your-subscription-url"
+  - Paoluz:
+    url: "https://example.com/your-subscription-url"
