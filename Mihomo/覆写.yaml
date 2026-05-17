@@ -8,7 +8,7 @@ proxies+:
     cipher: aes-128-gcm
     password: "???????"
 proxy-providers:
-  - nodes:
-    url: "https://example.com/your-subscription-url"
-  - Paoluz:
-    url: "https://example.com/your-subscription-url"
+  airport_1:
+    url: "https://example.com/your-real-subscription-url-1"
+  airport_2:
+    url: "https://example.com/your-real-subscription-url-2"
