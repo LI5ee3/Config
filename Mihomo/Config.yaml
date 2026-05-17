@@ -1,0 +1,672 @@
+# 使用前请先替换 proxy-providers.my_nodes.url 为你的订阅链接。
+
+# ===== 基础设置 =====
+mixed-port: 7890
+allow-lan: false
+bind-address: "*"
+mode: rule
+log-level: info
+ipv6: false
+find-process-mode: strict
+unified-delay: true
+tcp-concurrent: true
+global-client-fingerprint: chrome
+
+external-controller: 127.0.0.1:9090
+secret: ""
+
+# 如需面板，可取消下面三行注释。
+# external-ui: ui
+# external-ui-name: metacubexd
+# external-ui-url: "https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip"
+
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+geodata-mode: false
+geo-auto-update: true
+geo-update-interval: 24
+geox-url:
+  mmdb: "https://github.com/Hackl0us/GeoIP2-CN/raw/release/Country.mmdb"
+
+# ===== TUN 模式 =====
+# 如果客户端已经设置系统代理，可保持关闭；需要透明代理时再开启。
+tun:
+  enable: false
+  stack: mixed
+  auto-route: true
+  auto-detect-interface: true
+  strict-route: false
+  dns-hijack:
+    - any:53
+
+# ===== 域名嗅探 =====
+sniffer:
+  enable: true
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
+  skip-domain:
+    - "+.lan"
+    - "+.local"
+    - "localhost.ptlogin2.qq.com"
+
+# ===== DNS =====
+dns:
+  enable: true
+  listen: 0.0.0.0:1053
+  ipv6: false
+  use-hosts: true
+  use-system-hosts: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter-mode: blacklist
+  fake-ip-filter:
+    - "*.lan"
+    - "*.local"
+    - "localhost"
+    - "*.srv.nintendo.net"
+    - "*.stun.playstation.net"
+    - "xbox.*.microsoft.com"
+    - "*.xboxlive.com"
+    - "*.battlenet.com.cn"
+    - "*.battlenet.com"
+    - "*.blzstatic.cn"
+    - "*.battle.net"
+    - "stun.ugreengroup.com"
+    - "*.pub.3gppnetwork.org"
+    - "*.t-mobile.com"
+    - "*.apple.com"
+    - "*.msftconnecttest.com"
+    - "*.msftncsi.com"
+    - "+.pool.ntp.org"
+    - "time.*.com"
+    - "time.*.gov"
+    - "time.*.edu.cn"
+    - "ntp.*.com"
+    - "ntp.*.com.cn"
+    - "*.ntp.org.cn"
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+    - 1.1.1.1
+  nameserver-policy:
+    "+.pub.3gppnetwork.org": "https://8.8.8.8/dns-query"
+  proxy-server-nameserver:
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+  nameserver:
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+  fallback:
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    geosite:
+      - gfw
+
+# ===== 节点订阅 =====
+proxy-providers:
+  my_nodes:
+    type: http
+    url: "https://example.com/your-subscription-url"
+    path: ./proxy_providers/my_nodes.yaml
+    interval: 86400
+    health-check:
+      enable: true
+      url: http://connectivitycheck.gstatic.com/generate_204
+      interval: 600
+      timeout: 2000
+      expected-status: 204
+
+# 手动节点留空；如需手写节点，把 [] 改为列表。
+proxies: []
+
+# ===== 策略组 =====
+proxy-groups:
+  - name: "🚀 节点选择"
+    type: select
+    proxies:
+      - "🇭🇰 香港节点"
+      - "🇺🇲 美国节点"
+      - "🇯🇵 日本节点"
+      - "🇨🇳 台湾节点"
+      - "🇸🇬 新加坡节点"
+      - "✈️ 我的节点"
+      - "🀄️ 大陆直连"
+
+  - name: "🍎 苹果服务"
+    type: select
+    proxies:
+      - "🇭🇰 香港节点"
+      - "🇺🇲 美国节点"
+      - "🀄️ 大陆直连"
+
+  - name: "☁️ OneDrive"
+    type: select
+    proxies:
+      - "🇭🇰 香港节点"
+      - "🀄️ 大陆直连"
+
+  - name: "💵 Paypal"
+    type: select
+    proxies:
+      - "🇭🇰 香港节点"
+      - "🇺🇲 美国节点"
+      - "🀄️ 大陆直连"
+
+  - name: "🎲 Steam"
+    type: select
+    proxies:
+      - "🇭🇰 香港节点"
+      - "🀄️ 大陆直连"
+
+  - name: "🎮 游戏平台"
+    type: select
+    proxies:
+      - "🇭🇰 香港节点"
+      - "🀄️ 大陆直连"
+
+  - name: "🛍️ 电商平台"
+    type: select
+    proxies:
+      - "🇭🇰 香港节点"
+      - "🀄️ 大陆直连"
+
+  - name: "🇭🇰 香港节点"
+    type: url-test
+    use:
+      - my_nodes
+    filter: "(?i)香港|港|HK|Hong Kong|HongKong"
+    url: http://connectivitycheck.gstatic.com/generate_204
+    interval: 600
+    tolerance: 50
+    timeout: 2000
+    lazy: true
+    hidden: true
+
+  - name: "🇺🇲 美国节点"
+    type: url-test
+    use:
+      - my_nodes
+    filter: "(?i)美国|美國|US|USA|United States|America"
+    url: http://connectivitycheck.gstatic.com/generate_204
+    interval: 600
+    tolerance: 50
+    timeout: 2000
+    lazy: true
+    hidden: true
+
+  - name: "🇯🇵 日本节点"
+    type: url-test
+    use:
+      - my_nodes
+    filter: "(?i)日本|JP|Japan"
+    url: http://connectivitycheck.gstatic.com/generate_204
+    interval: 600
+    tolerance: 50
+    timeout: 2000
+    lazy: true
+    hidden: true
+
+  - name: "🇨🇳 台湾节点"
+    type: url-test
+    use:
+      - my_nodes
+    filter: "(?i)台湾|台灣|TW|Taiwan"
+    url: http://connectivitycheck.gstatic.com/generate_204
+    interval: 600
+    tolerance: 50
+    timeout: 2000
+    lazy: true
+    hidden: true
+
+  - name: "🇸🇬 新加坡节点"
+    type: url-test
+    use:
+      - my_nodes
+    filter: "(?i)新加坡|狮城|獅城|SG|Singapore"
+    url: http://connectivitycheck.gstatic.com/generate_204
+    interval: 600
+    tolerance: 50
+    timeout: 2000
+    lazy: true
+    hidden: true
+
+  - name: "🀄️ 大陆直连"
+    type: select
+    proxies:
+      - DIRECT
+
+  - name: "♻️ 网络净化"
+    type: select
+    proxies:
+      - REJECT
+
+  - name: "✈️ 我的节点"
+    type: select
+    use:
+      - my_nodes
+
+  - name: GLOBAL
+    type: select
+    proxies:
+      - "🚀 节点选择"
+      - "🇭🇰 香港节点"
+      - "🇺🇲 美国节点"
+      - "🇯🇵 日本节点"
+      - "🇨🇳 台湾节点"
+      - "🇸🇬 新加坡节点"
+      - "🀄️ 大陆直连"
+
+# ===== 外部规则集 =====
+# Surge 的 RULE-SET URL 在 Mihomo 中需要先声明为 rule-providers。
+# 这些 .list 文件按 classical/text 加载，规则顺序与原 Surge 配置保持一致。
+rule-providers:
+  lan:
+    type: http
+    path: ./ruleset/lan.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Lan/Lan.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  adobe:
+    type: http
+    path: ./ruleset/adobe.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Adobe/Adobe.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  li5_direct:
+    type: http
+    path: ./ruleset/li5_direct.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/LI5ee3/Rules/refs/heads/main/Surge/DIRECT.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  li5_us:
+    type: http
+    path: ./ruleset/li5_us.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/LI5ee3/Rules/refs/heads/main/Surge/US.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  li5_hk:
+    type: http
+    path: ./ruleset/li5_hk.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/LI5ee3/Rules/refs/heads/main/Surge/HK.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  t_mobile:
+    type: http
+    path: ./ruleset/t_mobile.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/LI5ee3/Rules/refs/heads/main/Surge/T_Mobile.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  apple_intelligence:
+    type: http
+    path: ./ruleset/apple_intelligence.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/LI5ee3/Rules/refs/heads/main/Surge/Apple_Intelligence.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  apple:
+    type: http
+    path: ./ruleset/apple.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Apple/Apple_All_No_Resolve.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  xbox_download:
+    type: http
+    path: ./ruleset/xbox_download.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/LI5ee3/Rules/refs/heads/main/Surge/Xbox_Download.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  game_download_cn:
+    type: http
+    path: ./ruleset/game_download_cn.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Surge/Game/GameDownloadCN/GameDownloadCN.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  steam_cn:
+    type: http
+    path: ./ruleset/steam_cn.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Surge/SteamCN/SteamCN.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  private_tracker:
+    type: http
+    path: ./ruleset/private_tracker.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Surge/PrivateTracker/PrivateTracker.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  download:
+    type: http
+    path: ./ruleset/download.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Surge/Download/Download.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  gemini:
+    type: http
+    path: ./ruleset/gemini.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Surge/Gemini/Gemini.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  openai:
+    type: http
+    path: ./ruleset/openai.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Surge/OpenAI/OpenAI.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  copilot:
+    type: http
+    path: ./ruleset/copilot.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Surge/Copilot/Copilot.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  google:
+    type: http
+    path: ./ruleset/google.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Surge/Google/Google.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  youtube:
+    type: http
+    path: ./ruleset/youtube.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Surge/YouTube/YouTube.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  netflix:
+    type: http
+    path: ./ruleset/netflix.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Netflix/Netflix.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  disney:
+    type: http
+    path: ./ruleset/disney.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Disney/Disney.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  global_media:
+    type: http
+    path: ./ruleset/global_media.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/GlobalMedia/GlobalMedia_All_No_Resolve.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  e_commerce:
+    type: http
+    path: ./ruleset/e_commerce.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/LI5ee3/Rules/refs/heads/main/Surge/E_commerce.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  paypal:
+    type: http
+    path: ./ruleset/paypal.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/PayPal/PayPal.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  onedrive:
+    type: http
+    path: ./ruleset/onedrive.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/OneDrive/OneDrive.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  xbox:
+    type: http
+    path: ./ruleset/xbox.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Xbox/Xbox.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  microsoft:
+    type: http
+    path: ./ruleset/microsoft.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Microsoft/Microsoft.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  telegram:
+    type: http
+    path: ./ruleset/telegram.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Telegram/Telegram.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  whatsapp:
+    type: http
+    path: ./ruleset/whatsapp.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Whatsapp/Whatsapp.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  steam:
+    type: http
+    path: ./ruleset/steam.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Steam/Steam.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  epic:
+    type: http
+    path: ./ruleset/epic.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Epic/Epic.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  origin:
+    type: http
+    path: ./ruleset/origin.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Origin/Origin.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  ubisoft:
+    type: http
+    path: ./ruleset/ubisoft.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Surge/Ubisoft/Ubisoft.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  rockstar:
+    type: http
+    path: ./ruleset/rockstar.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Surge/Rockstar/Rockstar.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  proxy:
+    type: http
+    path: ./ruleset/proxy.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Proxy/Proxy_All_No_Resolve.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+  china_max:
+    type: http
+    path: ./ruleset/china_max.list
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Surge/ChinaMax/ChinaMax_All_No_Resolve.list"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: text
+
+# ===== 分流规则 =====
+rules:
+  # 局域网地址
+  - RULE-SET,lan,🀄️ 大陆直连
+  - DOMAIN-SUFFIX,local,🀄️ 大陆直连
+  - IP-CIDR,192.168.5.0/24,🀄️ 大陆直连,no-resolve
+  - IP-CIDR,10.0.0.0/8,🀄️ 大陆直连,no-resolve
+  - IP-CIDR,172.16.0.0/12,🀄️ 大陆直连,no-resolve
+  - IP-CIDR,127.0.0.0/8,🀄️ 大陆直连,no-resolve
+
+  # Adobe / 网络净化
+  - PROCESS-PATH,/Applications/Adobe Photoshop 2025/Adobe Photoshop 2025.app/,♻️ 网络净化
+  - RULE-SET,adobe,♻️ 网络净化
+
+  # 个人规则集
+  - RULE-SET,li5_direct,🀄️ 大陆直连
+  - RULE-SET,li5_us,🇺🇲 美国节点
+  - RULE-SET,li5_hk,🇭🇰 香港节点
+
+  # T-Mobile WiFi Calling
+  - RULE-SET,t_mobile,🇺🇲 美国节点
+
+  # 苹果服务
+  - RULE-SET,apple_intelligence,🇺🇲 美国节点
+  - RULE-SET,apple,🍎 苹果服务
+
+  # 游戏下载 & PT
+  - RULE-SET,xbox_download,🀄️ 大陆直连
+  - RULE-SET,game_download_cn,🀄️ 大陆直连
+  - RULE-SET,steam_cn,🀄️ 大陆直连
+  - RULE-SET,private_tracker,🀄️ 大陆直连
+  - RULE-SET,download,🀄️ 大陆直连
+
+  # AI
+  - RULE-SET,gemini,🇺🇲 美国节点
+  - RULE-SET,openai,🇺🇲 美国节点
+  - RULE-SET,copilot,🇭🇰 香港节点
+
+  # Google
+  - RULE-SET,google,🇺🇲 美国节点
+
+  # 流媒体
+  - RULE-SET,youtube,🇭🇰 香港节点
+  - RULE-SET,netflix,🇭🇰 香港节点
+  - RULE-SET,disney,🇭🇰 香港节点
+  - RULE-SET,global_media,🇭🇰 香港节点
+
+  # 电商平台
+  - RULE-SET,e_commerce,🛍️ 电商平台
+
+  # Paypal
+  - RULE-SET,paypal,💵 Paypal
+
+  # 微软 & Xbox
+  - RULE-SET,onedrive,☁️ OneDrive
+  - RULE-SET,xbox,🇭🇰 香港节点
+  - RULE-SET,microsoft,🇭🇰 香港节点
+
+  # 社交平台
+  - RULE-SET,telegram,🇸🇬 新加坡节点
+  - RULE-SET,whatsapp,🇭🇰 香港节点
+
+  # 游戏平台
+  - RULE-SET,steam,🎲 Steam
+  - RULE-SET,epic,🎮 游戏平台
+  - RULE-SET,origin,🎮 游戏平台
+  - RULE-SET,ubisoft,🎮 游戏平台
+  - RULE-SET,rockstar,🎮 游戏平台
+
+  # Proxy
+  - RULE-SET,proxy,🚀 节点选择
+
+  # 中国大陆
+  - RULE-SET,china_max,🀄️ 大陆直连
+  - GEOIP,CN,🀄️ 大陆直连,no-resolve
+
+  # DNS 查询失败无法在 Mihomo 中 1:1 表达，这里使用 MATCH 作为兜底。
+  - MATCH,🚀 节点选择
+
+# ===== Surge URL Rewrite 迁移提示 =====
+# Surge 里的 Xbox URL Rewrite 属于 HTTP 改写能力，Mihomo 内核配置无法 1:1 实现。
+# 如果你的客户端支持重写/脚本，请在客户端侧迁移以下两条逻辑：
+# ^http://(assets1|assets2|d1|d2|xvcf1|xvcf2)\.xboxlive\.com -> http://assets1.xboxlive.cn
+# ^http://(dlassets|dlassets2)\.xboxlive\.com -> http://dlassets.xboxlive.cn
