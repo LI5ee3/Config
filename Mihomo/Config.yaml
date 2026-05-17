@@ -286,11 +286,11 @@ rule-providers:
   lan:
     type: http
     path: ./ruleset/lan.list
-    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Surge/Lan/Lan.list"
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Lan/Lan.yaml"
     interval: 86400
     proxy: DIRECT
     behavior: classical
-    format: text
+    format: yaml
 
   adobe:
     type: http
