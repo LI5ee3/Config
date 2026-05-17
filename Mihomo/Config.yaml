@@ -114,7 +114,7 @@ dns:
 
 # ===== 节点订阅 =====
 proxy-providers:
-  - nodes:
+  nodes:
     type: http
     url: "https://example.com/your-subscription-url"
     path: ./proxy_providers/nodes.yaml
@@ -125,7 +125,7 @@ proxy-providers:
       interval: 600
       timeout: 2000
       expected-status: 204
-  - Paoluz:
+  Paoluz:
     type: http
     url: "https://example.com/your-subscription-url"
     path: ./proxy_providers/Paoluz.yaml
