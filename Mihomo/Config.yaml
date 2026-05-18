@@ -226,7 +226,7 @@ proxy-groups:
     lazy: true
     hidden: true
 
-  - name: "🇨🇳 台湾节点"
+  - name: "🇹🇼 台湾节点"
     type: url-test
     use:
       - airport_1
@@ -426,20 +426,20 @@ rule-providers:
     proxy: DIRECT
     behavior: classical
     format: yaml
-
-  google:
-    type: http
-    path: ./ruleset/google.yaml
-    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Google/Google_No_Resolve.yaml"
-    interval: 86400
-    proxy: DIRECT
-    behavior: classical
-    format: yaml
-
+    
   youtube:
     type: http
     path: ./ruleset/youtube.yaml
     url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/YouTube/YouTube_No_Resolve.yaml"
+    interval: 86400
+    proxy: DIRECT
+    behavior: classical
+    format: yaml
+    
+  google:
+    type: http
+    path: ./ruleset/google.yaml
+    url: "https://gh.5993.top/raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Google/Google_No_Resolve.yaml"
     interval: 86400
     proxy: DIRECT
     behavior: classical
@@ -631,10 +631,10 @@ rules:
   - RULE-SET,copilot,🇭🇰 香港节点
 
   # Google
+  - RULE-SET,youtube,🎬 流媒体
   - RULE-SET,google,🇺🇲 美国节点
 
   # 流媒体
-  - RULE-SET,youtube,🎬 流媒体
   - RULE-SET,netflix,🎬 流媒体
   - RULE-SET,disney,🎬 流媒体
   - RULE-SET,global_media,🇭🇰 香港节点
